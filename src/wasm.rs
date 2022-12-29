@@ -188,3 +188,18 @@ impl SubAssign<Duration> for SystemTime {
         *self = *self - rhs;
     }
 }
+
+// Copied from chrono 0.4
+#[cfg(feature = "chrono")]
+impl<Tz: chrono::TimeZone> From<chrono::DateTime<Tz>> for SystemTime {
+    fn from(dt: chrono::DateTime<Tz>) -> SystemTime {
+        let sec = dt.timestamp();
+        let nsec = dt.timestamp_subsec_nanos();
+        if sec < 0 {
+            // unlikely but should be handled
+            UNIX_EPOCH - Duration::new(-sec as u64, 0) + Duration::new(0, nsec)
+        } else {
+            UNIX_EPOCH + Duration::new(sec as u64, nsec)
+        }
+    }
+}
